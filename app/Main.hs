@@ -1,6 +1,6 @@
 module Main where
 
-import Lib
+import Guess
 
 main :: IO ()
-main = someFunc
+main = putStrLn "★with the blessings of Hacker God 707★"

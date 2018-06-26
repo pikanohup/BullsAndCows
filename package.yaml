@@ -21,6 +21,8 @@ description:         Please see the README on GitHub at <https://github.com/pika
 
 dependencies:
 - base >= 4.7 && < 5
+- random
+- mtl
 
 library:
   source-dirs: src
