@@ -28,29 +28,26 @@ eval target shot = (appeared, inPosition) where
   appeared = length $ filter (\d -> d `elem` dx) de
   inPosition = length $ filter (\(x,y) -> x == y) $ zip (reverse de) (reverse dx)
 
-  
-partitions :: [Response] -> [(Response, Int)]
-partitions = map (\xs -> (head xs, length xs)) . group . sort
 
-reactions :: Answer -> [Answer] -> [Response]
-reactions question [] = [] 
-reactions question (c:codes) = (eval question c) : reactions question codes
+maxParts :: [Answer] -> Answer -> [Response] -> Int -> Int
+maxParts _ _ [] _ = 0
+maxParts ls x (r:rs) t = if len >= t then t else max len $ maxParts ls x rs t where
+    len = length $ filter (\y -> (eval y x == r) && y /= x) ls
+    
 
+minMax :: [Answer] -> [Answer] -> Int -> Answer -> Answer
+minMax _ [] _ acc = acc
+minMax gs (x:xs) mv mg = if v < mv then minMax gs xs v x else minMax gs xs mv mg where
+  responses = [(0,0), (1,0), (1,1), (2,0), (2,1), (2,2), (3,0), (3,1), (3,2), (3,3), (4,0), (4,1), (4,2), (4,3), (4,4)]
+  v = maxParts gs x responses mv
 
-entropies :: [Answer] -> [Answer]-> [(Answer, Double)]
-entropies [] _ = []
-entropies (c:cs) codes = (c, len) : entropies cs codes where
-  parts = partitions (reactions c codes)
-  xs = [x | (_,x) <- parts]
-  sumxs = sum xs
-  len = negate $ sum $ map (\x -> (fromIntegral x / fromIntegral sumxs) * logBase 2 (fromIntegral x / fromIntegral sumxs)) xs
 
  
 guess :: RandomGen g => g -> GameState -> (Answer, GameState)
-guess g (candidates, count) = (choice, (candidates, count)) where
+guess _ (candidates, count) = (choice, (candidates, count)) where
   choice = 
     if count == 0 then 1234
-    else fst $ foldr1 (\x acc -> if snd x > snd acc then x else acc) $ entropies candidates candidates
+    else minMax candidates candidates (length candidates) $ head candidates
 
 -- Clean the candidate set according to the response of the last guess
 refine :: (Answer, GameState) -> Response -> GameState
