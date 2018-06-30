@@ -44,5 +44,5 @@ loop n = getSum r
  
 main :: IO ()
 main = do
-  let range = [loop x | x <- [100..9999], valid x]
+  let range = [loop x | x <- [1024,1532..9999], valid x]
   writeFile "result.txt" $ show range ++ "," ++ show (sum range)
