@@ -11,9 +11,6 @@ valid n = 100 <= n && n <= 9999 && noDup n where
   noDup x = length (Data.List.nub (show x)) == 4
 
 type Game = StateT (StdGen, GameState, Int) (Writer (Sum Int))
-  -- StateT (StdGen, GameState) a   -- maintain the change of states
-  -- WriterT (Sum Int) a            -- count the nunber of guess
-  -- IO a                           -- output
 
 eval :: Int -> Int -> (Int, Int)
 eval e x = (appeared, inPosition) where
@@ -23,7 +20,6 @@ eval e x = (appeared, inPosition) where
   dx = show04 x
   appeared = length $ filter (\d -> d `elem` dx) de
   inPosition = length $ filter (\(x,y) -> x == y) $ zip (reverse de) (reverse dx)
-
 
 play :: Game ()
 play = do
@@ -36,13 +32,14 @@ play = do
   tell (Sum 1)
   when (x /= n) play
 
+-- Return the number of guesses of a game round
+-- secret code -> count
 loop :: Int -> Int
-loop n = getSum r
-  where g = mkStdGen 0
-        s = initialize valid
-        (_, r) = runWriter (runStateT play (g, s, n))
- 
+loop n = getSum r where 
+  (_, r) = runWriter (runStateT play (mkStdGen 0, initialize valid, n))
+
+-- Batch tests
 main :: IO ()
 main = do
-  let range = [loop x | x <- [1024,1532..9999], valid x]
+  let range = [loop x | x <- [100..9999], valid x]
   writeFile "result.txt" $ show range ++ "," ++ show (sum range)
